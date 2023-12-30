@@ -3,6 +3,7 @@
 import { ElementRef, useRef } from 'react'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '@/components/ui/popover'
 import { useAction } from '@/hooks/use-action'
 import { Button } from '@/components/ui/button'
@@ -19,11 +20,14 @@ interface FormPopoverProps {
 }
 
 export const FormPopover = ({ children, side = 'bottom', align, sideOffset = 0 }: FormPopoverProps) => {
+  const router = useRouter()
   const closeRef = useRef<ElementRef<'button'>>(null)
 
   const { execute, fieldErrors } = useAction(createBoard, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success('Board created!')
+      closeRef.current?.click()
+      router.push(`board/${data?.id}`)
     },
     onError: (error) => {
       toast.error(error)
@@ -32,8 +36,9 @@ export const FormPopover = ({ children, side = 'bottom', align, sideOffset = 0 }
 
   const onSubmit = (formData: FormData) => {
     const title = formData.get('title') as string
+    const image = formData.get('image') as string
 
-    execute({ title })
+    execute({ title, image })
   }
 
   return (
