@@ -10,6 +10,7 @@ import { DeleteBoard } from './schema'
 import { InputType, ReturnType } from './types'
 import { createAuditLog } from '@/lib/create-audit-log'
 import { decreaseAvailableCount } from '@/constants/org-limit'
+import { checkSubscription } from '@/lib/subscription'
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = auth()
@@ -21,6 +22,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
 
   const { id } = data
+  const isPro = await checkSubscription()
 
   try {
     const board = await db.board.delete({
@@ -30,7 +32,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       },
     })
 
-    await decreaseAvailableCount()
+    if (!isPro) {
+      await decreaseAvailableCount()
+    }
 
     await createAuditLog({
       entityTitle: board.title,
