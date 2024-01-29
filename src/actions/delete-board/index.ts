@@ -9,6 +9,7 @@ import { createSafeAction } from '@/lib/create-safe-action'
 import { DeleteBoard } from './schema'
 import { InputType, ReturnType } from './types'
 import { createAuditLog } from '@/lib/create-audit-log'
+import { decreaseAvailableCount } from '@/constants/org-limit'
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = auth()
@@ -28,6 +29,8 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         orgId,
       },
     })
+
+    await decreaseAvailableCount()
 
     await createAuditLog({
       entityTitle: board.title,
